@@ -50,13 +50,20 @@ version_gte() {
   return 0
 }
 
+# Use -V (capital V) as it is specific to the Rust CLI version strings
 if command -v openshell >/dev/null 2>&1; then
-  INSTALLED_VERSION="$(openshell --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo '0.0.0')"
-  if version_gte "$INSTALLED_VERSION" "$MIN_VERSION"; then
-    info "openshell already installed: $INSTALLED_VERSION (>= $MIN_VERSION)"
-    exit 0
+  # Verify if it's the Rust CLI, not a shadowing NPM package
+  VERSION_OUT="$(openshell -V 2>&1 || echo "")"
+  if echo "$VERSION_OUT" | grep -qi "^openshell [0-9]"; then
+    INSTALLED_VERSION="$(echo "$VERSION_OUT" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo '0.0.0')"
+    if version_gte "$INSTALLED_VERSION" "$MIN_VERSION"; then
+      info "openshell already installed: $INSTALLED_VERSION (>= $MIN_VERSION)"
+      exit 0
+    fi
+    warn "openshell $INSTALLED_VERSION is below minimum $MIN_VERSION — upgrading..."
+  else
+    warn "The 'openshell' command on PATH is not the OpenShell CLI binary (possibly shadowed by NPM). Reinstalling CLI..."
   fi
-  warn "openshell $INSTALLED_VERSION is below minimum $MIN_VERSION — upgrading..."
 fi
 
 info "Installing openshell CLI..."
