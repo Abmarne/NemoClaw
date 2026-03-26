@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const { execSync } = require("child_process");
+const { execSync, execFileSync } = require("child_process");
 const fs = require("fs");
 
 /**
@@ -23,7 +23,7 @@ const fs = require("fs");
  */
 function isRustCli(path) {
   try {
-    const output = execSync(`${path} -V`, {
+    const output = execFileSync(path, ["-V"], {
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 2000,
